@@ -7,7 +7,7 @@ If you have some awesome modifications I'm happy to accept your pull request.
 Use
 ---
 
-There's only one class "DropDownSelectorView" plus the background images (if you want to use them) to add to your project. The interface should be pretty much self explanatory.
+There's only one class "DropDownControlView" plus the background images (if you want to use them) to add to your project. The interface should be pretty much self explanatory.
 Just place the view somewhere and configure its button title and the options you want to display.
 
 The code uses ARC and you'll need to add the QuartzCore framework.
