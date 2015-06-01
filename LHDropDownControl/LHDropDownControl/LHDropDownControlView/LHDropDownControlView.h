@@ -29,6 +29,7 @@
 @interface LHDropDownControlView : UIView
 
 @property (nonatomic) NSString *title;
+@property (nonatomic) CGFloat optionHeight;
 @property (nonatomic, weak) id<LHDropDownControlViewDelegate> delegate;
 
 - (void)setSelectionOptions:(NSArray *)selectionOptions withTitles:(NSArray *)selectionOptionTitles;

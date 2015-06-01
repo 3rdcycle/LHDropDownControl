@@ -37,25 +37,37 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        mBaseFrame = frame;
-        
-        // Background
-        mBgImage = [[UIImage imageNamed:@"dropdown_bg"] resizableImageWithCapInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
-        UIImageView *backGroundView = [[UIImageView alloc] initWithImage:mBgImage];
-        backGroundView.frame = self.bounds;
-        [self addSubview:backGroundView];
-        
-        // Title
-        mTitleLabel = [[UILabel alloc] initWithFrame:CGRectInset(self.bounds, 5, 0)];
-        mTitleLabel.textAlignment = NSTextAlignmentCenter;
-        mTitleLabel.textColor = [UIColor whiteColor];
-        mTitleLabel.backgroundColor = [UIColor clearColor];
-        mTitleLabel.font = [UIFont boldSystemFontOfSize:14];
-        [self addSubview:mTitleLabel];
+        [self setup];
     }
     return self;
 }
 
+- (void)awakeFromNib {
+    [self setup];
+}
+
+- (void)setup {
+    self.optionHeight = kOptionHeight;
+    mBaseFrame = self.frame;
+    // Background
+    mBgImage = [[UIImage imageNamed:@"Drop Down Button BG"] resizableImageWithCapInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
+    UIImageView *backGroundView = [[UIImageView alloc] initWithImage:mBgImage];
+    backGroundView.frame = self.bounds;
+    [self addSubview:backGroundView];
+    
+    // Title
+    mTitleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    mTitleLabel.textAlignment = NSTextAlignmentCenter;
+    mTitleLabel.textColor = [UIColor whiteColor];
+    mTitleLabel.backgroundColor = [UIColor clearColor];
+    mTitleLabel.font = [UIFont boldSystemFontOfSize:14];
+    [self addSubview:mTitleLabel];
+}
+
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    mTitleLabel.frame = CGRectMake(5, 0, mBaseFrame.size.width - 10, mBaseFrame.size.height);
+}
 
 #pragma mark - Accessors
 
@@ -98,7 +110,7 @@
     // Calculate the selection index
     CGPoint location = [touch locationInView:self];
     if ((CGRectContainsPoint(self.bounds, location)) && (location.y > mBaseFrame.size.height)) {
-        mSelectionIndex = (location.y - mBaseFrame.size.height - kOptionSpacing) / (kOptionHeight + kOptionSpacing);
+        mSelectionIndex = (location.y - mBaseFrame.size.height - kOptionSpacing) / (self.optionHeight + kOptionSpacing);
     } else {
         mSelectionIndex = NSNotFound;
     }
@@ -165,7 +177,7 @@
         mSelectionCells = [NSMutableArray arrayWithCapacity:0];
         for (int i=0; i < [mSelectionTitles count]; i++) {
             UIImageView *newCell = [[UIImageView alloc] initWithImage:mBgImage];
-            newCell.frame = CGRectMake(0, mBaseFrame.size.height + (i * kOptionHeight + kOptionSpacing) + kOptionSpacing, mBaseFrame.size.width, kOptionHeight);
+            newCell.frame = CGRectMake(0, mBaseFrame.size.height + (i * self.optionHeight + kOptionSpacing) + kOptionSpacing, mBaseFrame.size.width, self.optionHeight);
             newCell.layer.anchorPoint = CGPointMake(0.5, 0.0);
             newCell.layer.transform = [self contractedTransorm];
             //newCell.alpha = 0;
@@ -184,7 +196,7 @@
     
     // Expand our frame
     CGRect newFrame = mBaseFrame;
-    newFrame.size.height += [mSelectionOptions count] * (kOptionHeight + kOptionSpacing);
+    newFrame.size.height += [mSelectionOptions count] * (self.optionHeight + kOptionSpacing);
     self.frame = newFrame;
 
     // Show selection cells animated
@@ -193,7 +205,7 @@
         UIView *cell = [mSelectionCells objectAtIndex:i];
         cell.alpha = 1.0;
         [UIView animateWithDuration:kAnimationDuration delay:(i * kAnimationDuration / count) options:0 animations:^{
-            CGRect destinationFrame = CGRectMake(0, mBaseFrame.size.height + i * (kOptionHeight + kOptionSpacing) + kOptionSpacing, mBaseFrame.size.width, kOptionHeight);
+            CGRect destinationFrame = CGRectMake(0, mBaseFrame.size.height + i * (self.optionHeight + kOptionSpacing) + kOptionSpacing, mBaseFrame.size.width, self.optionHeight);
             cell.frame = destinationFrame;
             cell.layer.transform = CATransform3DIdentity;
         } completion:nil];
@@ -203,13 +215,11 @@
 - (void)inactivateControl {
     mControlIsActive = NO;
     
-    [self.delegate dropDownControlView:self didFinishWithSelection:nil];
-    
-    int count = [mSelectionCells count];
+    int count = (int) [mSelectionCells count];
     for (int i = count - 1; i >= 0; i--) {
         UIView *cell = [mSelectionCells objectAtIndex:i];
         [UIView animateWithDuration:kAnimationDuration delay:((count - 1 - i) * kAnimationDuration / count) options:0 animations:^{
-            cell.frame = CGRectMake(0, mBaseFrame.size.height + (i * kOptionHeight + kOptionSpacing) + kOptionSpacing, mBaseFrame.size.width, mBaseFrame.size.height);
+            cell.frame = CGRectMake(0, mBaseFrame.size.height + (i * self.optionHeight + kOptionSpacing) + kOptionSpacing, mBaseFrame.size.width, mBaseFrame.size.height);
             cell.layer.transform = [self contractedTransorm];
         } completion:^(BOOL completed){
             cell.alpha = 0;
