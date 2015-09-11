@@ -14,7 +14,7 @@
 #define kAnimationDuration 0.2
 
 @implementation LHDropDownControlView {
-    CGRect mBaseFrame;
+    CGFloat mBaseHeight;
     
     // Configuration
     NSArray *mSelectionOptions, *mSelectionTitles;
@@ -48,7 +48,7 @@
 
 - (void)setup {
     self.optionHeight = kOptionHeight;
-    mBaseFrame = self.frame;
+    mBaseHeight = self.frame.size.height;
     // Background
     mBgImage = [[UIImage imageNamed:@"Drop Down Button BG"] resizableImageWithCapInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
     UIImageView *backGroundView = [[UIImageView alloc] initWithImage:mBgImage];
@@ -65,8 +65,9 @@
 }
 
 - (void)layoutSubviews {
+    NSLog(@"Layout Subviews");
     [super layoutSubviews];
-    mTitleLabel.frame = CGRectMake(5, 0, mBaseFrame.size.width - 10, mBaseFrame.size.height);
+    mTitleLabel.frame = CGRectMake(5, 0, self.frame.size.width - 10, mBaseHeight);
 }
 
 #pragma mark - Accessors
@@ -109,8 +110,8 @@
     
     // Calculate the selection index
     CGPoint location = [touch locationInView:self];
-    if ((CGRectContainsPoint(self.bounds, location)) && (location.y > mBaseFrame.size.height)) {
-        mSelectionIndex = (location.y - mBaseFrame.size.height - kOptionSpacing) / (self.optionHeight + kOptionSpacing);
+    if ((CGRectContainsPoint(self.bounds, location)) && (location.y > mBaseHeight)) {
+        mSelectionIndex = (location.y - mBaseHeight - kOptionSpacing) / (self.optionHeight + kOptionSpacing);
     } else {
         mSelectionIndex = NSNotFound;
     }
@@ -177,7 +178,7 @@
         mSelectionCells = [NSMutableArray arrayWithCapacity:0];
         for (int i=0; i < [mSelectionTitles count]; i++) {
             UIImageView *newCell = [[UIImageView alloc] initWithImage:mBgImage];
-            newCell.frame = CGRectMake(0, mBaseFrame.size.height + (i * self.optionHeight + kOptionSpacing) + kOptionSpacing, mBaseFrame.size.width, self.optionHeight);
+            newCell.frame = CGRectMake(0, mBaseHeight + (i * self.optionHeight + kOptionSpacing) + kOptionSpacing, self.frame.size.width, self.optionHeight);
             newCell.layer.anchorPoint = CGPointMake(0.5, 0.0);
             newCell.layer.transform = [self contractedTransorm];
             //newCell.alpha = 0;
@@ -195,17 +196,17 @@
     }
     
     // Expand our frame
-    CGRect newFrame = mBaseFrame;
+    CGRect newFrame = self.frame;
     newFrame.size.height += [mSelectionOptions count] * (self.optionHeight + kOptionSpacing);
     self.frame = newFrame;
 
     // Show selection cells animated
-    int count = [mSelectionCells count];
+    NSUInteger count = [mSelectionCells count];
     for (int i = 0; i < count; i++) {
         UIView *cell = [mSelectionCells objectAtIndex:i];
         cell.alpha = 1.0;
         [UIView animateWithDuration:kAnimationDuration delay:(i * kAnimationDuration / count) options:0 animations:^{
-            CGRect destinationFrame = CGRectMake(0, mBaseFrame.size.height + i * (self.optionHeight + kOptionSpacing) + kOptionSpacing, mBaseFrame.size.width, self.optionHeight);
+            CGRect destinationFrame = CGRectMake(0, mBaseHeight + i * (self.optionHeight + kOptionSpacing) + kOptionSpacing, self.frame.size.width, self.optionHeight);
             cell.frame = destinationFrame;
             cell.layer.transform = CATransform3DIdentity;
         } completion:nil];
@@ -219,12 +220,14 @@
     for (int i = count - 1; i >= 0; i--) {
         UIView *cell = [mSelectionCells objectAtIndex:i];
         [UIView animateWithDuration:kAnimationDuration delay:((count - 1 - i) * kAnimationDuration / count) options:0 animations:^{
-            cell.frame = CGRectMake(0, mBaseFrame.size.height + (i * self.optionHeight + kOptionSpacing) + kOptionSpacing, mBaseFrame.size.width, mBaseFrame.size.height);
+            cell.frame = CGRectMake(0, mBaseHeight + (i * self.optionHeight + kOptionSpacing) + kOptionSpacing, self.frame.size.width, mBaseHeight);
             cell.layer.transform = [self contractedTransorm];
         } completion:^(BOOL completed){
             cell.alpha = 0;
             if (i == 0) {
-                self.frame = mBaseFrame;
+                CGRect newFrame = self.frame;
+                newFrame.size.height = mBaseHeight;
+                self.frame = newFrame;
             }
     }];
     }
