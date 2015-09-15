@@ -65,7 +65,6 @@
 }
 
 - (void)layoutSubviews {
-    NSLog(@"Layout Subviews");
     [super layoutSubviews];
     mTitleLabel.frame = CGRectMake(5, 0, self.frame.size.width - 10, mBaseHeight);
 }
